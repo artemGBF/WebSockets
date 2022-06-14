@@ -6,13 +6,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-
 @Component
 @Slf4j
 public class TimeSender {
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
     @Autowired
     private SimpMessagingTemplate broker;
 
@@ -21,11 +17,9 @@ public class TimeSender {
         this.broker = broker;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 2000)
     public void run() {
-        String time = LocalTime.now().format(TIME_FORMAT);
-
-        log.info("Time broadcast: {}", time);
-        broker.convertAndSend("/topic/greetings", new Greeting("Current time is " + time));
+        log.info("ping.......");
+        broker.convertAndSend("/topic/greetings", new Message("PING"));
     }
 }

@@ -54,7 +54,7 @@ In my opinion this should be the default behavior. Note: you can't simply rethro
 
 So now that we are actually seeing exceptions I found out I was doing something wrong:
 
-    org.springframework.messaging.converter.MessageConversionException: No suitable converter, payloadType=class com.nibado.example.websocket.service.Greeting, handlerType=class com.nibado.example.websocket.client.MySessionHandler
+    org.springframework.messaging.converter.MessageConversionException: No suitable converter, payloadType=class com.nibado.example.websocket.service.Message, handlerType=class com.nibado.example.websocket.client.MySessionHandler
 	at org.springframework.messaging.simp.stomp.DefaultStompSession.invokeHandler(DefaultStompSession.java:443)
     
 I went through different permutations of removing the StringMessageConverter, returning the Type of String inside session handler .getPayloadType(), etc. The problem was both a lack of understanding on my part and (again) unclear documentation. First of all; the STOMP 'frames' you receive will have a mime type. It's not really easy to spot (I found out by dumping all the headers to std out) but the service implementation, because we are returning Greeting objects from the controller, is using Jackson to serialize these objects to JSON. This will also result in those frames getting the application/json mimetype. The StringMessageConverter will **only** work on text/plain messages.

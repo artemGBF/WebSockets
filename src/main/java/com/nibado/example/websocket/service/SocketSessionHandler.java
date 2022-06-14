@@ -1,24 +1,24 @@
-package com.nibado.example.websocket.client;
+package com.nibado.example.websocket.service;
 
-import com.nibado.example.websocket.service.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class MySessionHandler extends StompSessionHandlerAdapter {
-    private StompSession session = null;
+@Component
+public class SocketSessionHandler extends StompSessionHandlerAdapter {
+    private Map<String, StompSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-        this.session = session;
-        session.subscribe("/topic/greetings", this);
-
-        log.info("New session: {}", session.getSessionId());
+        sessions.put(session.getSessionId(), session);
     }
 
     @Override
@@ -33,9 +33,9 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void handleFrame(StompHeaders headers, Object payload) {
-        log.info("Received: {}", ((Message) payload).getContent());
-        if (((Message) payload).getContent().equals("PING")) {
-            session.send("/app/pong", "{\"content\":\"PONG\"}");
+        log.info("Received in frame: {}", ((Message) payload).getContent());
+        if (((Message) payload).getContent().equals("PONG")) {
+            StompSession stompSession = sessions.get(headers.getSession());
         }
     }
 }
